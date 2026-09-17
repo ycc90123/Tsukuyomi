@@ -12,10 +12,10 @@ pathMatcher: '{locale}/index.ts'
 keystyle: nested
 
 # 源语言（默认语言）
-sourceLanguage: zh-CN
+sourceLanguage: zh-TW
 
 # 显示语言
-displayLanguage: zh-CN
+displayLanguage: zh-TW
 
 # 启用的框架
 enabledFrameworks:
