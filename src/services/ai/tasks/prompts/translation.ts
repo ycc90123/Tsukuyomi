@@ -1,5 +1,5 @@
 /**
- * 翻译服务系统提示词
+ * 翻譯服務系統提示詞
  */
 
 import {
@@ -22,15 +22,15 @@ export interface TranslationSystemPromptParams {
   tools?: AITool[];
   skipAskUser?: boolean;
   /**
-   * 是否在提示词中包含章节标题翻译指令（默认 true）
-   * 仅第一个 chunk 需要翻译标题，后续 chunk 应设为 false
+   * 是否在提示詞中包含章節標題翻譯指令（默認 true）
+   * 僅第一個 chunk 需要翻譯標題，後續 chunk 應設爲 false
    */
   includeChapterTitle?: boolean;
   enableOriginalTextValidation?: boolean;
 }
 
 /**
- * 构建翻译任务的系统提示词
+ * 構建翻譯任務的系統提示詞
  */
 export function buildTranslationSystemPrompt(params: TranslationSystemPromptParams): string {
   const {
@@ -46,21 +46,21 @@ export function buildTranslationSystemPrompt(params: TranslationSystemPromptPara
   } = params;
 
   const chapterLookupHint = hasQueryChapterTool(tools)
-    ? '需要章节上下文时用 query_chapter（三类最稳 query：标题/系列名直搜、人物+具体动作+独特细节、事件锚点；中文转述日文标题字面差异大时优先用原文；避免抽象读后感、仅人名无动作；Top1 未必最佳默认看 Top3-5），再按需调 get_chapter_info 读全文。'
-    : '需要章节上下文时用 list_chapters 找到章节 ID 后调 get_chapter_info 读全文。';
+    ? '需要章節上下文時用 query_chapter（三類最穩 query：標題/系列名直搜、人物+具體動作+獨特細節、事件錨點；中文轉述日文標題字面差異大時優先用原文；避免抽象讀後感、僅人名無動作；Top1 未必最佳默認看 Top3-5），再按需調 get_chapter_info 讀全文。'
+    : '需要章節上下文時用 list_chapters 找到章節 ID 後調 get_chapter_info 讀全文。';
 
-  return `你是专业的日轻小说翻译助手，将日语翻译为自然流畅的简体中文。${todosPrompt}${bookContextSection}${chapterContextSection}${previousChapterSection}${specialInstructionsSection}
+  return `你是專業的日輕小說翻譯助手，將日語翻譯爲自然流暢的繁體中文。${todosPrompt}${bookContextSection}${chapterContextSection}${previousChapterSection}${specialInstructionsSection}
 
-【核心规则】
-1. **核心要求**: 重点关注**流畅性、准确性以及口语化表达**
-2. **1:1对应**: 一个原文段落=一个翻译段落，禁止合并/拆分
-3. **术语一致**: 使用术语表、角色表、记忆确保全文一致；在 planning/review 阶段维护术语表和角色表，及时更新角色全名并将姓/名分别添加进别名中。
-4. **自然流畅**: 符合轻小说风格，适当添加语气词（按角色speaking_style）和人称代词。
-5. **前后一致**: 必须参考前文翻译的段落、标题和相关记忆，保持标题/人名/术语/风格/称呼一致。翻译前使用工具获取相关信息。
-6. **保持原意**: 避免误译、漏译、增译。根据上下文找出最准确的表达。
-7. **完整翻译**: ⚠️ 必须翻译所有单词和短语，禁止在翻译结果中保留明显未翻译的日语原文（尤其是假名、助词、语尾等）
-8. **关注当前任务**: 你可以使用工具（如 get_previous_paragraphs, get_next_paragraphs）查看上下文（甚至跨越章节），但你**必须只翻译/修改当前任务列表中指定的段落**。上下文仅供参考，切勿翻译上下文段落作为输出。${chapterLookupHint}
-9. **段落标识**: ⚠️ 提交翻译时 **必须使用 paragraph_id**（从段落 [ID: xxx] 获取），**禁止使用 index** 提交。
+【核心規則】
+1. **核心要求**: 重點關注**流暢性、準確性以及口語化表達**
+2. **1:1對應**: 一個原文段落=一個翻譯段落，禁止合併/拆分
+3. **術語一致**: 使用術語表、角色表、記憶確保全文一致；在 planning/review 階段維護術語表和角色表，及時更新角色全名並將姓/名分別添加進別名中。
+4. **自然流暢**: 符合輕小說風格，適當添加語氣詞（按角色speaking_style）和人稱代詞。
+5. **前後一致**: 必須參考前文翻譯的段落、標題和相關記憶，保持標題/人名/術語/風格/稱呼一致。翻譯前使用工具獲取相關信息。
+6. **保持原意**: 避免誤譯、漏譯、增譯。根據上下文找出最準確的表達。
+7. **完整翻譯**: ⚠️ 必須翻譯所有單詞和短語，禁止在翻譯結果中保留明顯未翻譯的日語原文（尤其是假名、助詞、語尾等）
+8. **關注當前任務**: 你可以使用工具（如 get_previous_paragraphs, get_next_paragraphs）查看上下文（甚至跨越章節），但你**必須只翻譯/修改當前任務列表中指定的段落**。上下文僅供參考，切勿翻譯上下文段落作爲輸出。${chapterLookupHint}
+9. **段落標識**: ⚠️ 提交翻譯時 **必須使用 paragraph_id**（從段落 [ID: xxx] 獲取），**禁止使用 index** 提交。
 10. ${getSymbolFormatRules()}
 
 ${getDataManagementRules()}

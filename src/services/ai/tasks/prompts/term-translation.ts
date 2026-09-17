@@ -1,5 +1,5 @@
 /**
- * 术语翻译服务提示词
+ * 術語翻譯服務提示詞
  */
 
 export interface TermTranslationSystemPromptParams {
@@ -9,14 +9,14 @@ export interface TermTranslationSystemPromptParams {
 }
 
 /**
- * 构建术语翻译任务的系统提示词（无书籍上下文时）
+ * 構建術語翻譯任務的系統提示詞（無書籍上下文時）
  */
 export function buildTermTranslationSystemPromptBase(): string {
-  return '你是专业的日轻小说翻译助手，将日语术语翻译为自然流畅的简体中文。\n\n';
+  return '你是專業的日輕小說翻譯助手，將日語術語翻譯爲自然流暢的繁體中文。\n\n';
 }
 
 /**
- * 构建术语翻译任务的系统提示词（有书籍上下文时）
+ * 構建術語翻譯任務的系統提示詞（有書籍上下文時）
  */
 export function buildTermTranslationSystemPrompt(
   params: TermTranslationSystemPromptParams,
@@ -27,19 +27,19 @@ export function buildTermTranslationSystemPrompt(
     specialInstructionsSection = '',
   } = params;
 
-  return `你是专业的日轻小说翻译助手，将日语术语翻译为自然流畅的简体中文。
+  return `你是專業的日輕小說翻譯助手，將日語術語翻譯爲自然流暢的繁體中文。
 
 ${bookContextSection}${chapterContextSection}${specialInstructionsSection}
 
-【核心规则】
-1. **术语一致**: 使用术语表和角色表确保翻译一致
-2. **自然流畅**: 符合轻小说风格，保持术语的准确性
-3. **上下文理解**: 根据当前书籍、章节的上下文来理解术语含义
-4. **完整翻译**: ⚠️ 必须翻译所有单词和短语，禁止在翻译结果中保留未翻译的日语原文（如日文假名、汉字等）
+【核心規則】
+1. **術語一致**: 使用術語表和角色表確保翻譯一致
+2. **自然流暢**: 符合輕小說風格，保持術語的準確性
+3. **上下文理解**: 根據當前書籍、章節的上下文來理解術語含義
+4. **完整翻譯**: ⚠️ 必須翻譯所有單詞和短語，禁止在翻譯結果中保留未翻譯的日語原文（如日文假名、漢字等）
 
-**输出格式**：⚠️ **必须只返回 JSON 格式**（使用简化键名 t=translation）
-示例：{"t":"翻译结果"}
-只返回 JSON，不要包含任何其他内容、说明或代码块标记。
+**輸出格式**：⚠️ **必須只返回 JSON 格式**（使用簡化鍵名 t=translation）
+示例：{"t":"翻譯結果"}
+只返回 JSON，不要包含任何其他內容、說明或代碼塊標記。
 
 `;
 }
@@ -51,7 +51,7 @@ export interface TermTranslationUserPromptParams {
 }
 
 /**
- * 构建术语翻译任务的用户提示词
+ * 構建術語翻譯任務的用戶提示詞
  */
 export function buildTermTranslationUserPrompt(params: TermTranslationUserPromptParams): string {
   const { text, relatedContextInfo = '', customPrompt } = params;
@@ -60,18 +60,18 @@ export function buildTermTranslationUserPrompt(params: TermTranslationUserPrompt
     return customPrompt;
   }
 
-  return `请将以下日文术语翻译为简体中文，保持原文的格式和结构。⚠️ **必须只返回 JSON 格式**（使用简化键名 t=translation）：
-示例：{"t":"翻译结果"}
-只返回 JSON，不要包含任何其他内容、说明或代码块标记。
+  return `請將以下日文術語翻譯爲繁體中文，保持原文的格式和結構。⚠️ **必須只返回 JSON 格式**（使用簡化鍵名 t=translation）：
+示例：{"t":"翻譯結果"}
+只返回 JSON，不要包含任何其他內容、說明或代碼塊標記。
 
-待翻译术语：
+待翻譯術語：
 
 ${text}${relatedContextInfo}`;
 }
 
 /**
- * 构建 JSON 格式重试提示
+ * 構建 JSON 格式重試提示
  */
 export function buildTermTranslationRetryPrompt(): string {
-  return '响应格式错误：⚠️ **必须只返回 JSON 格式**：\n```json\n{\n  "t": "翻译结果"\n}\n```\n只返回 JSON，不要包含任何其他内容、说明或代码块标记。';
+  return '響應格式錯誤：⚠️ **必須只返回 JSON 格式**：\n```json\n{\n  "t": "翻譯結果"\n}\n```\n只返回 JSON，不要包含任何其他內容、說明或代碼塊標記。';
 }

@@ -1,5 +1,5 @@
 /**
- * 校对服务系统提示词
+ * 校對服務系統提示詞
  */
 
 import {
@@ -23,7 +23,7 @@ export interface ProofreadingSystemPromptParams {
 }
 
 /**
- * 构建校对任务的系统提示词
+ * 構建校對任務的系統提示詞
  */
 export function buildProofreadingSystemPrompt(params: ProofreadingSystemPromptParams): string {
   const {
@@ -36,22 +36,22 @@ export function buildProofreadingSystemPrompt(params: ProofreadingSystemPromptPa
     enableOriginalTextValidation,
   } = params;
 
-  return `你是专业的小说校对助手，检查并修正翻译文本错误。${todosPrompt}${bookContextSection}${chapterContextSection}${specialInstructionsSection}
+  return `你是專業的小說校對助手，檢查並修正翻譯文本錯誤。${todosPrompt}${bookContextSection}${chapterContextSection}${specialInstructionsSection}
 
-【校对检查项】⚠️ 只返回有变化的段落
-1. **文字**: 错别字、标点（全角）、语法、词语用法、一词多义、人称代词、语气词。
-2. **内容**: 人名/地名/称谓一致性、时间线/逻辑、设定准确性。
-3. **准确性**: 保持原意，避免误译、漏译、增译。并根据上下文找出最准确的表达。修正原有翻译中的错误。
-4. **格式**: 段落格式、数字用法统一、以及翻译缺失的标点符号。
-5. **完整翻译**: ⚠️ 检查并修正任何明显未翻译的日语原文（包括假名、助词、语尾等），确保所有内容都已翻译为中文
-6. **引号**: ⚠️ 确保翻译没有缺少原文的引号，如「」、『』和 “” 等
+【校對檢查項】⚠️ 只返回有變化的段落
+1. **文字**: 錯別字、標點（全角）、語法、詞語用法、一詞多義、人稱代詞、語氣詞。
+2. **內容**: 人名/地名/稱謂一致性、時間線/邏輯、設定準確性。
+3. **準確性**: 保持原意，避免誤譯、漏譯、增譯。並根據上下文找出最準確的表達。修正原有翻譯中的錯誤。
+4. **格式**: 段落格式、數字用法統一、以及翻譯缺失的標點符號。
+5. **完整翻譯**: ⚠️ 檢查並修正任何明顯未翻譯的日語原文（包括假名、助詞、語尾等），確保所有內容都已翻譯爲中文
+6. **引號**: ⚠️ 確保翻譯沒有缺少原文的引號，如「」、『』和 “” 等
 
-【校对原则】
-- **最小改动**: 只修正错误，保持原意和风格
-- **一致性优先**: 术语/角色名全文统一，用工具检查历史翻译
-- **参考原文**: 确保翻译准确，特别是标点符号，确保翻译没有缺少原文的引号。
-- **关注当前任务**: 你可以使用工具（如 get_previous_paragraphs, get_next_paragraphs）查看上下文（甚至跨越章节），但你**必须只校对/修改当前任务列表中指定的段落**。上下文仅供参考，切勿修改上下文段落作为输出。
-- **段落标识**: ⚠️ 提交结果时 **必须使用 paragraph_id**（从段落 [ID: xxx] 获取），**禁止使用 index** 提交。
+【校對原則】
+- **最小改動**: 只修正錯誤，保持原意和風格
+- **一致性優先**: 術語/角色名全文統一，用工具檢查歷史翻譯
+- **參考原文**: 確保翻譯準確，特別是標點符號，確保翻譯沒有缺少原文的引號。
+- **關注當前任務**: 你可以使用工具（如 get_previous_paragraphs, get_next_paragraphs）查看上下文（甚至跨越章節），但你**必須只校對/修改當前任務列表中指定的段落**。上下文僅供參考，切勿修改上下文段落作爲輸出。
+- **段落標識**: ⚠️ 提交結果時 **必須使用 paragraph_id**（從段落 [ID: xxx] 獲取），**禁止使用 index** 提交。
 - ${getSymbolFormatRules()}
 
 ${getDataManagementRules()}

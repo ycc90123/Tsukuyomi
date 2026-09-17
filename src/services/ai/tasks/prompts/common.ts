@@ -6,16 +6,16 @@ import { getTaskStateWorkflowText } from '../utils/task-types';
 import { TASK_TYPE_LABELS } from 'src/constants/ai';
 
 /**
- * 判断本次请求是否提供了 `query_chapter` 工具。
- * 用于条件性拼接提示词里的"章节语义搜索"段落 —— 本地嵌入关闭 / 手机端时,
- * 工具集合里不会出现 query_chapter,提示词也就不该再教模型去用它。
+ * 判斷本次請求是否提供了 `query_chapter` 工具。
+ * 用於條件性拼接提示詞裏的"章節語義搜索"段落 —— 本地嵌入關閉 / 手機端時,
+ * 工具集合裏不會出現 query_chapter,提示詞也就不該再教模型去用它。
  */
 export function hasQueryChapterTool(tools?: AITool[]): boolean {
   return tools?.some((t) => t.function.name === 'query_chapter') ?? false;
 }
 
 /**
- * 工具范围规则：严格限制 AI 只能调用本次请求提供的 tools
+ * 工具範圍規則：嚴格限制 AI 只能調用本次請求提供的 tools
  */
 export function getToolScopeRules(tools?: AITool[]): string {
   const toolNames = tools?.map((t) => t.function.name) ?? [];
@@ -24,43 +24,43 @@ export function getToolScopeRules(tools?: AITool[]): string {
       ? toolNames.map((n) => `- \`${n}\``).join('\n')
       : '- （本次未提供任何工具）';
 
-  return `【工具范围】⚠️ **只能使用本次会话提供的工具**
-- ⛔ 禁止调用未在列表中的工具
-- 工具未提供时：基于已有上下文继续任务
+  return `【工具範圍】⚠️ **只能使用本次會話提供的工具**
+- ⛔ 禁止調用未在列表中的工具
+- 工具未提供時：基於已有上下文繼續任務
 
 【本次可用工具列表】
 ${toolList}`;
 }
 
 /**
- * 获取全角符号格式规则（精简版）
+ * 獲取全角符號格式規則（精簡版）
  */
 export function getSymbolFormatRules(): string {
-  return `**格式规则**: 使用全角中文标点（，。？！：；「」『』（）——……），数字英文保持半角
+  return `**格式規則**: 使用全角中文標點（，。？！：；「」『』（）——……），數字英文保持半角
 
 ⚠️ **保持原始格式**:
-- 段落换行、缩进、特殊符号（★ ☆ ♥ ○ ● 等）
-- 数字格式和英文数字间空格
-- ⚠️ **非常重要**！确保翻译没有缺少原文的引号，如「」、『』和 ""
-- ⚠️ 原文中的中黑点「・」必须原样保留（如「・・」「・・・」），**禁止**将其转换为省略号「……」或其他符号
-- ⛔ 禁止添加/删除符号或修改排版`;
+- 段落換行、縮進、特殊符號（★ ☆ ♥ ○ ● 等）
+- 數字格式和英文數字間空格
+- ⚠️ **非常重要**！確保翻譯沒有缺少原文的引號，如「」、『』和 ""
+- ⚠️ 原文中的中黑點「・」必須原樣保留（如「・・」「・・・」），**禁止**將其轉換爲省略號「……」或其他符號
+- ⛔ 禁止添加/刪除符號或修改排版`;
 }
 
 /**
- * 获取规划阶段描述
+ * 獲取規劃階段描述
  */
 function getPlanningStateDescription(taskLabel: string, isBriefPlanning?: boolean): string {
   if (isBriefPlanning) {
-    return `**当前状态：简短规划阶段 (planning)**
-已继承前一部分的规划上下文。如需补充信息可调用工具，本阶段也可创建/更新术语、角色、记忆。
-按待办清单逐项确认，完成后 \`update_task_status({"status": "working"})\`。`;
+    return `**當前狀態：簡短規劃階段 (planning)**
+已繼承前一部分的規劃上下文。如需補充信息可調用工具，本階段也可創建/更新術語、角色、記憶。
+按待辦清單逐項確認，完成後 \`update_task_status({"status": "working"})\`。`;
   }
 
-  return `**当前状态：规划阶段 (planning)**
-上下文中提供的术语/角色/记忆已为最新，无需重新获取。按待办清单逐项确认，缺失时再调用工具补充。
-- 本阶段是唯一的输出前数据维护窗口：可创建/更新术语、角色、记忆
-- ⚠️ 当前阶段禁止提交${taskLabel}结果
-⚠️ 所有待办标记 done 后才能切换：\`update_task_status({"status": "working"})\``;
+  return `**當前狀態：規劃階段 (planning)**
+上下文中提供的術語/角色/記憶已爲最新，無需重新獲取。按待辦清單逐項確認，缺失時再調用工具補充。
+- 本階段是唯一的輸出前數據維護窗口：可創建/更新術語、角色、記憶
+- ⚠️ 當前階段禁止提交${taskLabel}結果
+⚠️ 所有待辦標記 done 後才能切換：\`update_task_status({"status": "working"})\``;
 }
 
 function getWorkingStateDescription(taskType: TaskType): string {
@@ -68,61 +68,61 @@ function getWorkingStateDescription(taskType: TaskType): string {
   let focusDesc = '';
   switch (taskType) {
     case 'translation':
-      focusDesc = '1:1翻译，敬语按流程处理';
+      focusDesc = '1:1翻譯，敬語按流程處理';
       break;
     case 'polish':
-      focusDesc = '语气词优化、摆脱翻译腔、节奏调整';
+      focusDesc = '語氣詞優化、擺脫翻譯腔、節奏調整';
       break;
     default:
-      focusDesc = '文字（错别字/标点/语法）、内容（一致性/逻辑）、格式检查';
+      focusDesc = '文字（錯別字/標點/語法）、內容（一致性/邏輯）、格式檢查';
   }
 
-  const onlyChangedNote = taskType === 'translation' ? '' : '（只返回有变化的段落）';
+  const onlyChangedNote = taskType === 'translation' ? '' : '（只返回有變化的段落）';
   const nextStatus = taskType === 'translation' ? 'review' : 'end';
   const nextStatusNote =
-    taskType === 'translation' ? '' : '（⚠️ 注意：此任务没有 review 阶段，直接进入 end）';
+    taskType === 'translation' ? '' : '（⚠️ 注意：此任務沒有 review 階段，直接進入 end）';
   const dataWriteRestrictionNote =
-    taskType === 'translation' ? '（请在 planning 或 review 阶段处理）' : '（请在 planning 阶段处理）';
+    taskType === 'translation' ? '（請在 planning 或 review 階段處理）' : '（請在 planning 階段處理）';
   const dataWriteRestrictionLine = dataWriteRestrictionNote
-    ? `- ⛔ 禁止创建/更新术语、角色、记忆${dataWriteRestrictionNote}\n`
+    ? `- ⛔ 禁止創建/更新術語、角色、記憶${dataWriteRestrictionNote}\n`
     : '';
 
-  return `**当前状态：${taskLabel}中 (working)**
-- 专注于${taskLabel}：${focusDesc}
-${dataWriteRestrictionLine}- 使用 \`add_translation_batch\` 提交结果 ${onlyChangedNote}（**单次上限 ${MAX_TRANSLATION_BATCH_SIZE} 段**）
-按待办清单逐批完成，每批完成后标记 done。
-⚠️ 所有待办标记 done 后才能切换：\`update_task_status({"status": "${nextStatus}"})\`${nextStatusNote}`;
+  return `**當前狀態：${taskLabel}中 (working)**
+- 專注於${taskLabel}：${focusDesc}
+${dataWriteRestrictionLine}- 使用 \`add_translation_batch\` 提交結果 ${onlyChangedNote}（**單次上限 ${MAX_TRANSLATION_BATCH_SIZE} 段**）
+按待辦清單逐批完成，每批完成後標記 done。
+⚠️ 所有待辦標記 done 後才能切換：\`update_task_status({"status": "${nextStatus}"})\`${nextStatusNote}`;
 }
 
 /**
- * 获取复核阶段描述
+ * 獲取複覈階段描述
  */
 function getReviewStateDescription(_taskLabel: string): string {
-  return `**当前状态：复核阶段 (review)**
-按待办清单逐项检查，发现问题可直接用 \`add_translation_batch\` 修正。
-可创建/更新术语、角色、记忆。
-⚠️ 所有待办标记 done 后才能切换：\`update_task_status({"status": "end"})\``;
+  return `**當前狀態：複覈階段 (review)**
+按待辦清單逐項檢查，發現問題可直接用 \`add_translation_batch\` 修正。
+可創建/更新術語、角色、記憶。
+⚠️ 所有待辦標記 done 後才能切換：\`update_task_status({"status": "end"})\``;
 }
 
 /**
- * 获取结束阶段描述
+ * 獲取結束階段描述
  */
 function getEndStateDescription(hasNextChunk?: boolean): string {
   const nextChunkNote = hasNextChunk
-    ? '当前块已完成，系统将自动提供下一个块。'
-    : '所有内容已处理完毕，这是最后一个块。';
+    ? '當前塊已完成，系統將自動提供下一個塊。'
+    : '所有內容已處理完畢，這是最後一個塊。';
 
-  return `**当前状态：完成 (end)**
+  return `**當前狀態：完成 (end)**
 ${nextChunkNote}
-⚠️ **注意**：任务已结束，你不应再调用任何工具或输出内容，请直接结束本次会话。`;
+⚠️ **注意**：任務已結束，你不應再調用任何工具或輸出內容，請直接結束本次會話。`;
 }
 
 /**
- * 获取当前状态信息（用于告知AI当前处于哪个阶段）
- * @param taskType 任务类型
- * @param status 当前状态
- * @param isBriefPlanning 是否为简短规划阶段（用于后续 chunk，已继承前一个 chunk 的规划上下文）
- * @param hasNextChunk 是否有下一个块可用
+ * 獲取當前狀態信息（用於告知AI當前處於哪個階段）
+ * @param taskType 任務類型
+ * @param status 當前狀態
+ * @param isBriefPlanning 是否爲簡短規劃階段（用於後續 chunk，已繼承前一個 chunk 的規劃上下文）
+ * @param hasNextChunk 是否有下一個塊可用
  */
 export function getCurrentStatusInfo(
   taskType: TaskType,
@@ -133,7 +133,7 @@ export function getCurrentStatusInfo(
   const taskLabel = TASK_TYPE_LABELS[taskType];
 
   switch (status) {
-    // preparing 已并入 planning，旧持久化任务恢复到该状态时复用同一段描述
+    // preparing 已併入 planning，舊持久化任務恢復到該狀態時複用同一段描述
     case 'planning':
     case 'preparing':
       return getPlanningStateDescription(taskLabel, isBriefPlanning);
@@ -149,153 +149,153 @@ export function getCurrentStatusInfo(
 }
 
 /**
- * 获取敬语处理规则（独立模块）
- * [警告] 核心规则：严禁将敬语添加为别名
+ * 獲取敬語處理規則（獨立模塊）
+ * [警告] 核心規則：嚴禁將敬語添加爲別名
  */
 export function getHonorificRules(): string {
-  return `【敬语处理规则】
-⛔ **核心禁止**: 严禁自动将敬语（如"田中さん"）添加为角色别名（别名爆炸会破坏一致性，别名由用户手动维护）
+  return `【敬語處理規則】
+⛔ **核心禁止**: 嚴禁自動將敬語（如"田中さん"）添加爲角色別名（別名爆炸會破壞一致性，別名由用戶手動維護）
 
-**常见敬语对照**（仅为参考，最终按角色关系与历史翻译决定）:
-- さん: 通用敬语 → "先生/小姐/同学"，或省略（如"田中さん" → "田中先生" / "田中"）
+**常見敬語對照**（僅爲參考，最終按角色關係與歷史翻譯決定）:
+- さん: 通用敬語 → "先生/小姐/同學"，或省略（如"田中さん" → "田中先生" / "田中"）
 - くん: 男性非正式 → "君"，或省略
-- ちゃん: 亲近/年幼 → "~酱"，或亲昵称呼
-- 様: 正式敬语 → "大人/阁下"
-- 殿: 古风敬语 → "殿/阁下"
-- 先輩/後輩: → "前辈/学长学姐" / "后辈/学弟学妹"
+- ちゃん: 親近/年幼 → "~醬"，或親暱稱呼
+- 様: 正式敬語 → "大人/閣下"
+- 殿: 古風敬語 → "殿/閣下"
+- 先輩/後輩: → "前輩/學長學姐" / "後輩/學弟學妹"
 
-**处理流程**（严格按顺序执行）:
-1. **别名优先**: 若【相关角色参考】的 \`aliases\` 中存在完全匹配的带敬语别名且有译文，**必须直接使用**，不得重新翻译
-2. **检查角色关系**: 查看角色描述中的关系字段，判断亲密度与场合
-3. **搜索历史翻译**: 使用 \`find_paragraph_by_keywords\` 查找该角色+敬语组合的既有译法，必须保持一致
-4. **搜索记忆**: 若有相关敬语处理方式的记忆，遵循记忆约定
-5. **按关系决定**: 上述均无结果时，根据关系与上下文判断
+**處理流程**（嚴格按順序執行）:
+1. **別名優先**: 若【相關角色參考】的 \`aliases\` 中存在完全匹配的帶敬語別名且有譯文，**必須直接使用**，不得重新翻譯
+2. **檢查角色關係**: 查看角色描述中的關係字段，判斷親密度與場合
+3. **搜索歷史翻譯**: 使用 \`find_paragraph_by_keywords\` 查找該角色+敬語組合的既有譯法，必須保持一致
+4. **搜索記憶**: 若有相關敬語處理方式的記憶，遵循記憶約定
+5. **按關係決定**: 上述均無結果時，根據關係與上下文判斷
 
-**关系与策略对应**:
-- 亲密关系（妹妹/好友/青梅竹马/恋人）: 可省略敬语或使用亲密称呼
-- 正式关系（上司/老师/长辈/客户）: 必须保留并翻译为对应中文敬语
-- 同辈关系（同学/同事）: 根据场景与语气判断
-- 初次见面/陌生人: 保留正式敬语
-- 关系不明: 优先保留敬语，结合上下文判断，并与历史翻译保持一致
+**關係與策略對應**:
+- 親密關係（妹妹/好友/青梅竹馬/戀人）: 可省略敬語或使用親密稱呼
+- 正式關係（上司/老師/長輩/客戶）: 必須保留並翻譯爲對應中文敬語
+- 同輩關係（同學/同事）: 根據場景與語氣判斷
+- 初次見面/陌生人: 保留正式敬語
+- 關係不明: 優先保留敬語，結合上下文判斷，並與歷史翻譯保持一致
 
-⚠️ **一致性铁律**:
-- **章节内必须一致**: 同一章内同一角色的同一称呼**必须**翻译完全相同，禁止出现混用（例如同章内既翻成"田中先生"又翻成"田中"）
-- **跨章节保持一致**: 同一角色同一称呼在全文中应始终翻译一致，若发现不一致应以最早出现或用户已确认的译法为准
-- **敬语自检**: 扫描本批次内同一角色的所有敬语译法是否统一；必要时使用 \`find_paragraph_by_keywords\` 在当前章节内校验`;
+⚠️ **一致性鐵律**:
+- **章節內必須一致**: 同一章內同一角色的同一稱呼**必須**翻譯完全相同，禁止出現混用（例如同章內既翻成"田中先生"又翻成"田中"）
+- **跨章節保持一致**: 同一角色同一稱呼在全文中應始終翻譯一致，若發現不一致應以最早出現或用戶已確認的譯法爲準
+- **敬語自檢**: 掃描本批次內同一角色的所有敬語譯法是否統一；必要時使用 \`find_paragraph_by_keywords\` 在當前章節內校驗`;
 }
 
 /**
- * 获取数据管理规则（术语/角色/记忆工作流）
+ * 獲取數據管理規則（術語/角色/記憶工作流）
  */
 export function getDataManagementRules(): string {
-  return `【数据管理规则】
-**状态约束**:
-- planning：可创建/更新术语、角色、记忆（输出前唯一的数据维护窗口）
-- working：仅执行翻译/润色/校对输出，禁止数据写入
-- review：仅翻译任务可用，且可创建/更新术语、角色、记忆
+  return `【數據管理規則】
+**狀態約束**:
+- planning：可創建/更新術語、角色、記憶（輸出前唯一的數據維護窗口）
+- working：僅執行翻譯/潤色/校對輸出，禁止數據寫入
+- review：僅翻譯任務可用，且可創建/更新術語、角色、記憶
 
-**术语/角色分离**:
-- 术语表：专有名词、概念、技能、地名、物品（⛔ 禁止放人名）
-- 角色表：全名为主名称，姓/名为别名（⛔ 禁止放术语）
-- ⚠️ 每个术语只能有一个翻译（如"龙套"而非"路人角色／龙套"）
+**術語/角色分離**:
+- 術語表：專有名詞、概念、技能、地名、物品（⛔ 禁止放人名）
+- 角色表：全名爲主名稱，姓/名爲別名（⛔ 禁止放術語）
+- ⚠️ 每個術語只能有一個翻譯（如"龍套"而非"路人角色／龍套"）
 
-**角色管理**: 新角色先检查是否为已有别名，描述需简短（性别/关系/关键特征）
+**角色管理**: 新角色先檢查是否爲已有別名，描述需簡短（性別/關係/關鍵特徵）
 
-⚠️ **保持数据最新**:
-- 发现全名 → 更新主名称，原名移入别名
-- 发现新信息 → 在可写阶段尽快 \`update_term\`/\`update_character\`
-- 空翻译/重复/误分类 → 在可写阶段尽快修复
-- 新术语/角色 → 先检查是否存在，不存在则创建`;
+⚠️ **保持數據最新**:
+- 發現全名 → 更新主名稱，原名移入別名
+- 發現新信息 → 在可寫階段儘快 \`update_term\`/\`update_character\`
+- 空翻譯/重複/誤分類 → 在可寫階段儘快修復
+- 新術語/角色 → 先檢查是否存在，不存在則創建`;
 }
 
 /**
- * 获取记忆管理规则（精简版）
+ * 獲取記憶管理規則（精簡版）
  */
 export function getMemoryWorkflowRules(): string {
-  return `【记忆管理】
-目标：**短、有效、可检索、可复用**（写少但写对）
+  return `【記憶管理】
+目標：**短、有效、可檢索、可複用**（寫少但寫對）
 
-**⛔ 内容限制（重要）**：
-- **只保留翻译相关**：术语翻译、角色名称翻译、文风偏好、特定短语翻译选择、敬语处理方式等
-- **严禁存储**：故事设定、背景、世界观、剧情内容、情节发展等（这些属于冗余信息，不应占用记忆空间）
-- 记忆的核心目的是帮助未来翻译保持一致性和质量，而非记录故事情节
+**⛔ 內容限制（重要）**：
+- **只保留翻譯相關**：術語翻譯、角色名稱翻譯、文風偏好、特定短語翻譯選擇、敬語處理方式等
+- **嚴禁存儲**：故事設定、背景、世界觀、劇情內容、情節發展等（這些屬於冗餘信息，不應占用記憶空間）
+- 記憶的核心目的是幫助未來翻譯保持一致性和質量，而非記錄故事情節
 
-**自动召回**：Embedding 可用时系统以语义相似度为主、关键词与时间衰减为辅；不可用时回退到关键词与时间衰减，自动选择最相关的记忆注入翻译上下文，无需手动关联。
-- 在 summary 和 content 中明确提及相关角色/术语名称，可提升关键词匹配得分
+**自動召回**：Embedding 可用時系統以語義相似度爲主、關鍵詞與時間衰減爲輔；不可用時回退到關鍵詞與時間衰減，自動選擇最相關的記憶注入翻譯上下文，無需手動關聯。
+- 在 summary 和 content 中明確提及相關角色/術語名稱，可提升關鍵詞匹配得分
 
-**搜索**：使用 \`search_memories\` 传入自然语言查询（如"主角的敬语习惯"），系统自动混合关键词和语义检索
-- 需要详细内容时用 \`get_memory\` 获取完整记忆
+**搜索**：使用 \`search_memories\` 傳入自然語言查詢（如"主角的敬語習慣"），系統自動混合關鍵詞和語義檢索
+- 需要詳細內容時用 \`get_memory\` 獲取完整記憶
 
-**写入规则**：
-- 写入时机：仅在可写阶段执行 \`create_memory\`/\`update_memory\`（planning；翻译任务还可在 review）
-- 写入门槛：仅对未来有长期收益、可复用时才写入（⛔ 一次性信息不写入）
-- ⚠️ **默认不新建**：优先合并到已有记忆，重写为更短清晰的版本
+**寫入規則**：
+- 寫入時機：僅在可寫階段執行 \`create_memory\`/\`update_memory\`（planning；翻譯任務還可在 review）
+- 寫入門檻：僅對未來有長期收益、可複用時才寫入（⛔ 一次性信息不寫入）
+- ⚠️ **默認不新建**：優先合併到已有記憶，重寫爲更短清晰的版本
 
-**字段约束**：summary ≤40字 + 关键词 | content 1-3条要点（总 ≤300字）`;
+**字段約束**：summary ≤40字 + 關鍵詞 | content 1-3條要點（總 ≤300字）`;
 }
 
 /**
- * 获取待办事项工具描述（精简版）
+ * 獲取待辦事項工具描述（精簡版）
  */
 function getTodoToolsDescription(_taskType: TaskType): string {
-  return `**待办管理**: 系统自动生成待办清单，完成一项就用 \`mark_todo_done\` 标记（\`id\` 单条或 \`ids\` 批量，无需先标记进行中）。所有待办完成后方可切换阶段。`;
+  return `**待辦管理**: 系統自動生成待辦清單，完成一項就用 \`mark_todo_done\` 標記（\`id\` 單條或 \`ids\` 批量，無需先標記進行中）。所有待辦完成後方可切換階段。`;
 }
 
 /**
- * 获取状态字段说明（精简版）
+ * 獲取狀態字段說明（精簡版）
  */
 function getStatusFieldDescription(taskType: TaskType): string {
-  return `**状态流程**: ${getTaskStateWorkflowText(taskType)}`;
+  return `**狀態流程**: ${getTaskStateWorkflowText(taskType)}`;
 }
 
 /**
- * 获取工具化输出格式规则（新方式：使用工具调用替代 JSON）
+ * 獲取工具化輸出格式規則（新方式：使用工具調用替代 JSON）
  */
 export function getOutputFormatRules(
   taskType: TaskType,
   options?: { includeChapterTitle?: boolean; enableOriginalTextValidation?: boolean },
 ): string {
-  const onlyChanged = taskType !== 'translation' ? '（只返回有变化的段落）' : '';
+  const onlyChanged = taskType !== 'translation' ? '（只返回有變化的段落）' : '';
   const isTranslation = taskType === 'translation';
-  // 标题翻译指令仅在第一个 chunk 时包含（后续 chunk 标题已在第一个 chunk 中翻译）
+  // 標題翻譯指令僅在第一個 chunk 時包含（後續 chunk 標題已在第一個 chunk 中翻譯）
   const includeTitle = isTranslation && (options?.includeChapterTitle ?? true);
   const validateOriginal = options?.enableOriginalTextValidation === true;
 
   const titleToolSection = includeTitle
-    ? '3. update_chapter_title（仅 working）参数：{"chapter_id": "章节ID", "title_translation": "标题翻译"}'
+    ? '3. update_chapter_title（僅 working）參數：{"chapter_id": "章節ID", "title_translation": "標題翻譯"}'
     : '';
 
   const titleToolRestriction = includeTitle ? ' / update_chapter_title' : '';
 
   const toolRestriction = isTranslation
-    ? `⛔ add_translation_batch${titleToolRestriction}：仅 working/review 可调用（单次上限 ${MAX_TRANSLATION_BATCH_SIZE} 段）
-   - working 禁止创建/更新术语、角色、记忆
-   - end 禁止再调用工具`
-    : `⛔ add_translation_batch：仅 working 可调用（单次上限 ${MAX_TRANSLATION_BATCH_SIZE} 段）
-   - working 禁止创建/更新术语、角色、记忆
-   - end 禁止再调用工具`;
+    ? `⛔ add_translation_batch${titleToolRestriction}：僅 working/review 可調用（單次上限 ${MAX_TRANSLATION_BATCH_SIZE} 段）
+   - working 禁止創建/更新術語、角色、記憶
+   - end 禁止再調用工具`
+    : `⛔ add_translation_batch：僅 working 可調用（單次上限 ${MAX_TRANSLATION_BATCH_SIZE} 段）
+   - working 禁止創建/更新術語、角色、記憶
+   - end 禁止再調用工具`;
 
-  return `【输出格式】添加翻译结果必须使用工具调用。按待办清单顺序执行。
+  return `【輸出格式】添加翻譯結果必須使用工具調用。按待辦清單順序執行。
 
-**工具要点**
-1. update_task_status：完成当前阶段所有待办后切换 {"status": "..."}
-2. add_translation_batch：一次最多 ${MAX_TRANSLATION_BATCH_SIZE} 段，${validateOriginal ? '必须使用 paragraph_id + original_text_prefix 标识并锚定段落：{"paragraph_id": "xxx", "original_text_prefix": "原文前3-10字", "translated_text": "..."}（从段落 [ID: xxx] 与原文开头提取，禁止使用 index 提交；原文不足3字时填完整原文）' : '必须使用 paragraph_id 标识段落：{"paragraph_id": "xxx", "translated_text": "..."}（从段落 [ID: xxx] 获取，禁止使用 index 提交）'}${titleToolSection ? '\n' + titleToolSection : ''}
-3. 若 add_translation_batch 返回结构化错误（如 error_code / invalid_items / invalid_paragraph_ids / failed_paragraphs），必须仅修复报错条目后重试，禁止重排段落、猜测或替换 paragraph_id
+**工具要點**
+1. update_task_status：完成當前階段所有待辦後切換 {"status": "..."}
+2. add_translation_batch：一次最多 ${MAX_TRANSLATION_BATCH_SIZE} 段，${validateOriginal ? '必須使用 paragraph_id + original_text_prefix 標識並錨定段落：{"paragraph_id": "xxx", "original_text_prefix": "原文前3-10字", "translated_text": "..."}（從段落 [ID: xxx] 與原文開頭提取，禁止使用 index 提交；原文不足3字時填完整原文）' : '必須使用 paragraph_id 標識段落：{"paragraph_id": "xxx", "translated_text": "..."}（從段落 [ID: xxx] 獲取，禁止使用 index 提交）'}${titleToolSection ? '\n' + titleToolSection : ''}
+3. 若 add_translation_batch 返回結構化錯誤（如 error_code / invalid_items / invalid_paragraph_ids / failed_paragraphs），必須僅修復報錯條目後重試，禁止重排段落、猜測或替換 paragraph_id
 
 ${getStatusFieldDescription(taskType)}
-- 段落 ID 与原文 1:1 对应${onlyChanged}
-- ${isTranslation ? '必须全覆盖' : '仅提交修改过的段落'}
+- 段落 ID 與原文 1:1 對應${onlyChanged}
+- ${isTranslation ? '必須全覆蓋' : '僅提交修改過的段落'}
 ${toolRestriction}
 
-【用户回报】
-- 及时向用户回报当前专注的任务以及翻译进度
-- 输出要精简，不要一次性输出太多内容。
+【用戶回報】
+- 及時向用戶回報當前專注的任務以及翻譯進度
+- 輸出要精簡，不要一次性輸出太多內容。
 
 `;
 }
 
 /**
- * 获取工具使用说明（精简版）
+ * 獲取工具使用說明（精簡版）
  */
 export function getToolUsageInstructions(
   taskType: TaskType,
@@ -304,20 +304,20 @@ export function getToolUsageInstructions(
 ): string {
   const taskLabel = TASK_TYPE_LABELS[taskType];
   const askUserLine = !skipAskUser
-    ? '- **询问**: 当有需要用户确认/做决定时，用 `ask_user_batch` 一次性解决所有疑问\n'
+    ? '- **詢問**: 當有需要用戶確認/做決定時，用 `ask_user_batch` 一次性解決所有疑問\n'
     : '';
   const queryChapterLine = hasQueryChapterTool(tools)
-    ? '- **章节混合检索**：需要跨章节回忆剧情/场景/人物关系/设定时，用 `query_chapter`（语义 + 标题/正文关键词 + IDF 稀有词加权 + 章号/卷号 identifier 强匹配），返回章节 ID、标题、匹配度、前 200 字预览；再按需调 `get_chapter_info` 读全文。\n' +
-      '  - **三类最稳 query**：① 标题/系列名直搜（"第二王女" / "深渊之森攻略" / "星天 ⑥"）；② 人物+身份+具体动作+独特细节（"夏洛特紧张到胃痛接近芬恩"）；③ 事件锚点（"吻痕被发现后开始审问"）。\n' +
-      '  - **较弱**：抽象读后感（"后宫气氛成形"）→ 改成具体场面；仅人名无动作 → 补动作/细节；不存在的系列词 → 改用 `list_chapters` 看真实标题。\n' +
-      '  - **中文转述日文标题**：字面差异大时不稳，**优先用原文标题词**或加更强锚点（人物+动作）。\n' +
-      '  - **把它当候选定位器**：Top1 未必最佳，默认看 Top3-5；不确定时 `limit` 调到 8-10。\n'
+    ? '- **章節混合檢索**：需要跨章節回憶劇情/場景/人物關係/設定時，用 `query_chapter`（語義 + 標題/正文關鍵詞 + IDF 稀有詞加權 + 章號/卷號 identifier 強匹配），返回章節 ID、標題、匹配度、前 200 字預覽；再按需調 `get_chapter_info` 讀全文。\n' +
+      '  - **三類最穩 query**：① 標題/系列名直搜（"第二王女" / "深淵之森攻略" / "星天 ⑥"）；② 人物+身份+具體動作+獨特細節（"夏洛特緊張到胃痛接近芬恩"）；③ 事件錨點（"吻痕被發現後開始審問"）。\n' +
+      '  - **較弱**：抽象讀後感（"後宮氣氛成形"）→ 改成具體場面；僅人名無動作 → 補動作/細節；不存在的系列詞 → 改用 `list_chapters` 看真實標題。\n' +
+      '  - **中文轉述日文標題**：字面差異大時不穩，**優先用原文標題詞**或加更強錨點（人物+動作）。\n' +
+      '  - **把它當候選定位器**：Top1 未必最佳，默認看 Top3-5；不確定時 `limit` 調到 8-10。\n'
     : '';
   return `${getToolScopeRules(tools)}
 
-【工具使用建议】
-- 用途：获取上下文、维护术语/角色/记忆、查询历史翻译、查询待办事项。
-- 优先用本地数据，网络工具仅用于外部知识
-${queryChapterLine}${askUserLine}- 最小必要：拿到信息后立刻回到${taskLabel}输出
+【工具使用建議】
+- 用途：獲取上下文、維護術語/角色/記憶、查詢歷史翻譯、查詢待辦事項。
+- 優先用本地數據，網絡工具僅用於外部知識
+${queryChapterLine}${askUserLine}- 最小必要：拿到信息後立刻回到${taskLabel}輸出
 - ${getTodoToolsDescription(taskType)}`;
 }
