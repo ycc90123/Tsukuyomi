@@ -25,16 +25,19 @@ bun run type-check       # TypeScript 类型检查 (vue-tsc --noEmit)
 bun run quality-check    # Fallow 代码质量检查 (bunx fallow)
 bun run format           # Prettier 格式化
 
-# 测试
-bun test                           # 运行所有测试
-bun test book-service              # 按文件名模式匹配
-bun test -t "应该保存书籍"         # 按测试名匹配
-bun test --watch                   # 监听模式
+# 测试 (主要 runner 是 Vitest，不是 bun test)
+bun run test                       # 运行所有测试
+bun run test:watch                 # 监听模式
+bun run test:coverage              # istanbul 覆盖率 → coverage/coverage-final.json
+bunx vitest run <file-pattern>     # 按文件名模式匹配
+bunx vitest run -t "测试描述"      # 按测试名匹配
 ```
 
 **修改代码后必须运行**: `bun run lint && bun run type-check && bun run quality-check`
 
-**首次 clone 必跑**: `bun run setup:git-hooks` — 把 `core.hooksPath` 指向 [`.githooks/`](.githooks/) 启用 pre-commit。hook 文件或目录缺失时 git **静默跳过**，build 号不会自增，记得跑。
+**quality-check 前置条件**: 必须先跑 `bun run test:coverage` — `scripts/fallow-ci-check.ts` 在缺少 `coverage/coverage-final.json`（gitignored，全新 checkout 必然没有）时会直接 exit 1。它只检查相对 `origin/main` 的改动范围，未跟踪新文件由脚本内部 `git add -N` 纳入 diff。
+
+**首次 clone 必跑**: `bun run setup:git-hooks` — 把 `core.hooksPath` 指向 [`.githooks/`](.githooks/) 启用 pre-commit（每次 commit 自动跑 `bun scripts/bump-version.ts build` 并 stage `package.json` + `src/constants/version.ts`，build 号自增）。hook 文件或目录缺失时 git **静默跳过**，build 号不会自增，记得跑。
 
 ---
 
@@ -78,6 +81,10 @@ import { BookService } from 'src/services/book-service';
 - `@typescript-eslint/no-misused-promises`: warn
 - TypeScript strict 模式已启用 (quasar.config.ts)
 
+### 禁止 barrel 自我导入 (ESLint error)
+
+`src/services/ai/**` 与 `src/services/scraper/**` 内部文件**不能**从 barrel（`src/services/ai`、`src/services/scraper` 或任何 `./index`）导入，必须用具体文件路径，防止 barrel ↔ 子文件循环依赖。外部消费者仍可用 barrel。
+
 ### Fallow 误报抑制
 
 `bun run quality-check` 跑的 fallow 无法识别 Vue `<template>` 消费者、动态 import、抽象基类多态调用等路径。遇到 `unused-export` / `unused-class-member` 告警：
@@ -97,7 +104,7 @@ export const MODEL_ID = '...';
 abstract fetchNovel(url: string): Promise<Novel>;
 ```
 
-注释放在声明**正上方一行**；有 JSDoc 时夹在 JSDoc 的 `*/` 与声明之间。
+注释放在声明**正上方一行**；有 JSDoc 时夹在 JSDoc 的 `*/` 与声明之间。现存代码已使用的抑制规则还有 `code-duplication` 与 `unused-store-members`。
 
 ---
 
@@ -124,7 +131,7 @@ src/
 ├── utils/         # 工具函数
 ├── constants/     # 常量定义
 ├── types/         # 全局类型定义
-└── __tests__/     # 测试文件 (70+ 测试文件)
+└── __tests__/     # 测试文件 (150+ 测试文件)
 ```
 
 **核心 Services**: `book-service`, `chapter-service`, `chapter-content-service`, `memory-service`, `memory-scoring`, `embedding-service`, `embedding-queue`, `terminology-service`, `sync-data-service`
@@ -256,8 +263,10 @@ describe('MyService', () => {
 **关键规则**:
 
 - 必须导入 `./setup` (提供 fake-indexeddb、localStorage、FileReader polyfill，每个 test 前自动 `resetDbForTests()`)
+- `vitest-setup.ts` 已全局 mock PrimeVue `useToast` 并在每 test 前重置 Pinia，测试里无需重复处理
 - 使用 `spyOn` 局部 mock，避免全局 `mock.module` 影响其他测试
 - 模块级 mock 用 `vi.mock(path, factory)` + `vi.hoisted(...)`，**不要** `await mock.module(...)`（vite 不提升）
+- 运行时按测试动态换 mock 用 `vi.doMock + vi.resetModules + 动态 import()`（参考 `local-embedding.test.ts`）
 - 测试导入 service 使用相对路径 `../services/xxx`
 
 ---
