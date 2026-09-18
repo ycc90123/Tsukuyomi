@@ -33,7 +33,7 @@ All novel data is stored per-book in `tsukuyomi-data/novels/<novel-id>.json`.
 When given a novel URL (e.g. Kakuyomu or Syosetu):
 1. Execute the helper script via Bash:
    ```bash
-   bun scripts/skill-helpers/scrape-novel.ts "<URL>"
+   bun .opencode/skills/tsukuyomi-translator/scripts/scrape-novel.ts "<URL>"
    ```
 2. The script will save the JSON structure to `tsukuyomi-data/novels/<novel-id>.json`.
 3. Read `tsukuyomi-data/novels/<novel-id>.json` using the `read` tool to inspect title, volume count, and chapter list.
@@ -105,7 +105,7 @@ When asked to polish or proofread translated chapters:
 When asked to export a chapter as Markdown or a 2-column table:
 1. Execute the helper script via Bash:
    ```bash
-   bun scripts/skill-helpers/export-chapter-md.ts "tsukuyomi-data/novels/<novel-id>.json" <chapter-number-or-id>
+   bun .opencode/skills/tsukuyomi-translator/scripts/export-chapter-md.ts "tsukuyomi-data/novels/<novel-id>.json" <chapter-number-or-id>
    ```
 2. The script outputs a clean Markdown file with a 2-column table (Japanese | Traditional Chinese) to `tsukuyomi-data/exports/`.
 

@@ -7,7 +7,7 @@ function main() {
   const chapterIndexArg = args[1]; // 1-based index (global chapter index across volumes) or chapter ID
 
   if (!jsonPath || !chapterIndexArg) {
-    console.error('Usage: bun scripts/skill-helpers/export-chapter-md.ts <path-to-novel.json> <chapter-number-or-id>');
+    console.error('Usage: bun .opencode/skills/tsukuyomi-translator/scripts/export-chapter-md.ts <path-to-novel.json> <chapter-number-or-id>');
     process.exit(1);
   }
 

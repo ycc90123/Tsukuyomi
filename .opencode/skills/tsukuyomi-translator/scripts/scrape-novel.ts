@@ -1,12 +1,12 @@
-import { NovelScraperFactory } from '../../src/services/scraper/novel-scraper-factory';
+import { NovelScraperFactory } from '../../../../src/services/scraper/novel-scraper-factory';
 import * as fs from 'fs';
 import * as path from 'path';
-import type { Novel, Paragraph } from '../../src/models/novel';
+import type { Novel, Paragraph } from '../../../../src/models/novel';
 
 async function main() {
   const url = process.argv[2];
   if (!url) {
-    console.error('Usage: bun scripts/skill-helpers/scrape-novel.ts <url>');
+    console.error('Usage: bun .opencode/skills/tsukuyomi-translator/scripts/scrape-novel.ts <url>');
     process.exit(1);
   }
 
