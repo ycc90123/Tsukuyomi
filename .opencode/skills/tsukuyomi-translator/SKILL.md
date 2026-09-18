@@ -22,7 +22,8 @@ All novel data is stored per-book in `tsukuyomi-data/novels/<novel-id>.json`.
 2. **Setup Knowledge Base (`characters` & `terms`)**: Create and maintain character settings (speaking style, aliases, gender) and terminology glossaries for consistent translation.
 3. **Translate Chapter (`translate`)**: Perform high-quality chapter translation from Japanese to Traditional Chinese paragraph-by-paragraph using Tsukuyomi prompt rules.
 4. **Polish & Proofread (`polish` / `proofread`)**: Eliminate translationese (擺脫翻譯腔), refine tone/speaking styles, and check for typos/punctuation errors.
-5. **Memory Orchestration (`memory`)**: Extract and update long-context story plot memories per book to ensure deep consistency across 100+ chapters.
+5. **Export Chapter to Markdown (`export-md`)**: Export translated chapter to a Markdown file formatted as a 2-column table (Left: Japanese original, Right: Traditional Chinese translation).
+6. **Memory Orchestration (`memory`)**: Extract and update long-context story plot memories per book to ensure deep consistency across 100+ chapters.
 
 ---
 
@@ -100,7 +101,17 @@ When asked to polish or proofread translated chapters:
 
 ---
 
-### Step 5: Updating Plot Memories
+### Step 5: Exporting Chapter to Markdown Table
+When asked to export a chapter as Markdown or a 2-column table:
+1. Execute the helper script via Bash:
+   ```bash
+   bun scripts/skill-helpers/export-chapter-md.ts "tsukuyomi-data/novels/<novel-id>.json" <chapter-number-or-id>
+   ```
+2. The script outputs a clean Markdown file with a 2-column table (Japanese | Traditional Chinese) to `tsukuyomi-data/exports/`.
+
+---
+
+### Step 6: Updating Plot Memories
 After translating key plot chapters:
 1. Summarize significant plot developments, item acquisitions, or relationship changes.
 2. Append to `novel.memories[]`:
