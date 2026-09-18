@@ -67,17 +67,26 @@ function main() {
   let exportCount = 0;
 
   for (const p of paragraphs) {
-    const jp = (p.text || '').trim();
-    if (!jp) continue; // Skip empty spacing lines
+    const rawJp = p.text || '';
+    const trimmedJp = rawJp.trim();
+    if (!trimmedJp) continue; // Skip empty spacing lines
 
     const transObj = p.translations && p.translations.length > 0
       ? (p.selectedTranslationId ? p.translations.find((t: any) => t.id === p.selectedTranslationId) || p.translations[0] : p.translations[0])
       : null;
 
-    const zh = transObj ? transObj.translation : '';
+    const rawZh = transObj ? transObj.translation : '';
     
-    const safeJp = jp.replace(/\|/g, '\\|').replace(/\n/g, '<br>');
-    const safeZh = zh.replace(/\|/g, '\\|').replace(/\n/g, '<br>');
+    // 強制轉義換行符與管道符，防止 Markdown 表格破裂
+    const safeJp = rawJp
+      .replace(/\|/g, '\\|')
+      .replace(/\r\n/g, '<br>')
+      .replace(/\n/g, '<br>');
+
+    const safeZh = rawZh
+      .replace(/\|/g, '\\|')
+      .replace(/\r\n/g, '<br>')
+      .replace(/\n/g, '<br>');
 
     mdContent += `| ${safeJp} | ${safeZh} |\n`;
     exportCount++;
