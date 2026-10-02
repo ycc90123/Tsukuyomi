@@ -1,135 +1,109 @@
 ---
 name: tsukuyomi-translator
-description: AI-driven Japanese light novel translation, scraping, polishing, proofreading, character/terminology management, and plot memory orchestration in Traditional Chinese. Use when the user requests downloading, managing, translating, polishing, or organizing light novels, chapters, terminology, character settings, or plot memories.
+description: AI-driven Japanese light novel translation, scraping, polishing, proofreading, character/terminology management, and bilingual table export in Traditional Chinese (繁體中文). Use when the user requests downloading, managing, translating, polishing, or organizing light novels, chapters, terminology, character settings, or exporting to Tsukuyomi web format.
 license: Apache-2.0
 compatibility: OpenCode environment with Bun installed
 metadata:
   author: tsukuyomi
-  version: "1.0"
+  version: "2.0"
 ---
 
 # Tsukuyomi Translator — OpenCode Agent Skill
 
-This skill allows OpenCode Agent to operate as the complete end-to-end engine for Japanese Light Novel translation, management, scraping, and refining, outputting 100% **Traditional Chinese (繁體中文)**.
+本 Skill 賦予 OpenCode Agent 完整的日文輕小說翻譯、章節抓取、語氣潤色、名詞一致性管理與雙向網頁版相容能力，輸出預設 100% 為**繁體中文 (台灣)**。
 
-All novel data is stored per-book in `tsukuyomi-data/novels/<novel-id>.json`.
-
----
-
-## Capabilities & Workflows
-
-1. **Scrape Novel (`scrape`)**: Fetch novel metadata and all chapter texts directly from `ncode.syosetu.com`, `kakuyomu.jp`, `syosetu.org`, or `novel18.syosetu.com`.
-2. **Setup Knowledge Base (`characters` & `terms`)**: Create and maintain character settings (speaking style, aliases, gender) and terminology glossaries for consistent translation.
-3. **Translate Chapter (`translate`)**: Perform high-quality chapter translation from Japanese to Traditional Chinese paragraph-by-paragraph using Tsukuyomi prompt rules.
-4. **Polish & Proofread (`polish` / `proofread`)**: Eliminate translationese (擺脫翻譯腔), refine tone/speaking styles, and check for typos/punctuation errors.
-5. **Export Chapter to Markdown (`export-md`)**: Export translated chapter to a Markdown file formatted as a 2-column table (Left: Japanese original, Right: Traditional Chinese translation).
-6. **Memory Orchestration (`memory`)**: Extract and update long-context story plot memories per book to ensure deep consistency across 100+ chapters.
+採用**「逐章純文字 + 簡潔 YAML 知識庫 + 雙向轉換橋接器」**架構，徹底解決巨型 JSON 帶來的 Token 浪費與上下文干擾，同時保證成果可隨時一鍵打包匯入 Tsukuyomi 網頁版。
 
 ---
 
-## Detailed Step-by-Step Instructions
+## 📁 小說目錄架構
 
-### Step 1: Scraping a Novel
-When given a novel URL (e.g. Kakuyomu or Syosetu):
-1. Execute the helper script via Bash:
+每部小說均存放在獨立資料夾（預設 `novels/<小說名稱>/`）：
+
+```text
+novels/<novel-name>/
+├── meta.yaml               # 小說資訊、卷與章節目錄
+├── characters.yaml         # 角色設定表 (姓名、性別、口癖、別名、譯名)
+├── glossary.yaml           # 術語庫 (專有名詞、技能、地名、譯名)
+├── memories.yaml           # 文風與翻譯約定 (嚴禁存劇情流水帳)
+├── raw/                    # 各章日文原文純文字 (1 章 1 檔)
+│   └── ch001_序章.txt
+└── translated/             # 各章日中雙欄對照 Markdown (1 章 1 檔)
+    └── ch001_序章.md
+```
+
+---
+
+## 🛠️ 核心指令與輔助工具
+
+1. **抓取小說 (Scrape)**:
    ```bash
-   bun .opencode/skills/tsukuyomi-translator/scripts/scrape-novel.ts "<URL>"
+   bun .opencode/skills/tsukuyomi-translator/scripts/scrape.ts "<小說網址>" [novels/<目錄名>] [--limit N]
    ```
-2. The script will save the JSON structure to `tsukuyomi-data/novels/<novel-id>.json`.
-3. Read `tsukuyomi-data/novels/<novel-id>.json` using the `read` tool to inspect title, volume count, and chapter list.
+   支援 `kakuyomu.jp`、`ncode.syosetu.com`、`novel18.syosetu.com`、`syosetu.org`。
 
----
-
-### Step 2: Managing Characters & Terminology
-Before translating or during translation:
-1. Open `tsukuyomi-data/novels/<novel-id>.json`.
-2. Check `characterSettings` and `terminologies`.
-3. If new characters or terms are identified:
-   - Add them to `characterSettings[]`:
-     ```json
-     {
-       "id": "char-<shortid>",
-       "name": "日文原名",
-       "sex": "female",
-       "description": "描述",
-       "speakingStyle": "口癖/語氣",
-       "translation": { "id": "t1", "translation": "繁體中文譯名", "aiModelId": "opencode-agent" },
-       "aliases": []
-     }
-     ```
-   - Add to `terminologies[]`:
-     ```json
-     {
-       "id": "term-<shortid>",
-       "name": "日文專有名詞",
-       "description": "解釋",
-       "translation": { "id": "t1", "translation": "繁體中文譯名", "aiModelId": "opencode-agent" }
-     }
-     ```
-4. Update the JSON file using `write` or `edit`.
-
----
-
-### Step 3: Translating a Chapter
-When asked to translate a specific chapter:
-1. Read the target novel JSON `tsukuyomi-data/novels/<novel-id>.json`.
-2. Locate the target chapter inside `volumes[].chapters[]`.
-3. Extract current `characterSettings`, `terminologies`, and `memories`.
-4. Load translation prompts from `.opencode/skills/tsukuyomi-translator/references/PROMPTS_GUIDE.md`.
-5. For each paragraph in `chapter.content`:
-   - Apply translation prompt rules (1:1 alignment, Traditional Chinese, full punctuation compliance, honorifics/styles).
-   - Generate a new `Translation` entry:
-     ```json
-     {
-       "id": "<short-hex>",
-       "translation": "繁體中文譯文",
-       "aiModelId": "opencode-agent"
-     }
-     ```
-   - Push to `paragraph.translations` and set `paragraph.selectedTranslationId` to the new ID.
-6. Translate chapter title if not already translated.
-7. Save updated novel JSON back to `tsukuyomi-data/novels/<novel-id>.json`.
-
----
-
-### Step 4: Polishing & Proofreading
-When asked to polish or proofread translated chapters:
-1. Read `tsukuyomi-data/novels/<novel-id>.json`.
-2. Apply Polish or Proofread prompt rules from `PROMPTS_GUIDE.md`.
-3. Create an updated `Translation` entry for each paragraph, appending it to `paragraph.translations[]` and updating `selectedTranslationId`.
-4. Save the novel JSON back.
-
----
-
-### Step 5: Exporting Chapter to Markdown Table
-When asked to export a chapter as Markdown or a 2-column table:
-1. Execute the helper script via Bash:
+2. **解包 Tsukuyomi 網頁版 JSON (Unpack)**:
    ```bash
-   bun .opencode/skills/tsukuyomi-translator/scripts/export-chapter-md.ts "tsukuyomi-data/novels/<novel-id>.json" <chapter-number-or-id>
+   bun .opencode/skills/tsukuyomi-translator/scripts/tsukuyomi-bridge.ts unpack <novel.json> [novels/<目錄名>]
    ```
-2. The script outputs a clean Markdown file with a 2-column table (Japanese | Traditional Chinese) to `tsukuyomi-data/exports/`.
+
+3. **打包回 Tsukuyomi 網頁版 JSON (Pack)**:
+   ```bash
+   bun .opencode/skills/tsukuyomi-translator/scripts/tsukuyomi-bridge.ts pack novels/<小說目錄> [output.json]
+   ```
+   產出之 JSON 可直接在 Tsukuyomi 網頁版 / 桌面版匯入瀏覽。
 
 ---
 
-### Step 6: Updating Plot Memories
-After translating key plot chapters:
-1. Summarize significant plot developments, item acquisitions, or relationship changes.
-2. Append to `novel.memories[]`:
-   ```json
-   {
-     "id": "mem-<shortid>",
-     "bookId": "<novel-id>",
-     "content": "詳細情節記憶內容",
-     "summary": "簡短摘要",
-     "createdAt": Date.now(),
-     "lastAccessedAt": Date.now()
-   }
+## 📖 Agent 作業標準流程 (SOP)
+
+### 步驟 1：建立或載入小說
+- 若使用者提供**小說網址**：執行 `scrape.ts` 下載目錄與原文。
+- 若使用者提供**網頁版備份 JSON**：執行 `tsukuyomi-bridge.ts unpack` 解包。
+- 檢查 `novels/<小說名稱>/meta.yaml` 確認章節清單。
+
+### 步驟 2：維護角色與術語庫
+翻譯前或翻譯過程中，讀取並維護小說目錄下的 YAML 檔案：
+- **`characters.yaml`**：記錄登場角色、口癖、語氣、主要譯名與別名。
+- **`glossary.yaml`**：記錄作品獨特的專有名詞、技能名、地名、道具名。
+- **`memories.yaml`**：僅記錄文風偏好與特殊翻譯約束（**嚴禁寫入劇情內容**）。
+
+### 步驟 3：逐章翻譯 (Translate)
+當使用者要求翻譯指定章節（例如「翻譯第 2 章」）：
+1. 讀取 `novels/<小說名稱>/characters.yaml` 與 `glossary.yaml`。
+2. 讀取 `novels/<小說名稱>/raw/chXXX_*.txt`。
+3. 遵循 `.opencode/skills/tsukuyomi-translator/references/PROMPTS_GUIDE.md` 規範：
+   - **1:1 段落嚴格對應**：禁止擅自合併或拆分。
+   - **標點全形化**：使用中文全形標點（`，。？！：；「」『』（）——……`），英數半形。
+   - **日文中黑點保留**：原文中的「・」必須原樣保留，禁止改為「……」。
+   - **引號嚴格成對**：原文有「」『』"" 時，譯文必須對齊成對引號。
+   - **敬語處理鐵律**：別名優先，章節內嚴格一致，嚴禁將敬語加入別名。
+   - **完整翻譯**：絕不遺留假名或未翻譯片假名。
+4. 將結果直接寫入 `novels/<小說名稱>/translated/chXXX_*.md`：
+   ```markdown
+   # 日文原標題 / 繁中譯名
+
+   | 日文原文 | 繁體中文譯文 |
+   | :--- | :--- |
+   | 原文第 1 段 | 譯文第 1 段 |
+   | 原文第 2 段 | 譯文第 2 段 |
    ```
-3. Save the JSON.
+   （段落內如有 `|` 需轉義為 `\|`，段落內換行轉換為 `<br>`）。
+5. 檢查此章是否有新出現的人名或術語，主動更新至 YAML。
+
+### 步驟 4：潤色與校對 (Polish & Proofread)
+當使用者要求「潤色」或「校對」：
+1. 讀取對應的 `translated/chXXX_*.md`。
+2. 消除翻譯腔，對白帶入角色 `speakingStyle`。
+3. 逐行比對錯漏字與術語一致性，直接以 `edit` 或 `write` 修改該 Markdown 檔案。
+
+### 步驟 5：匯入回 Tsukuyomi 網頁版
+當使用者需要將翻譯成果匯入回 Tsukuyomi 網頁版閱讀：
+執行 `bun .opencode/skills/tsukuyomi-translator/scripts/tsukuyomi-bridge.ts pack novels/<小說目錄> [output.json]`，產出之 JSON 即可在網頁版無縫匯入。
 
 ---
 
-## References
+## 📚 參考規範手冊
 
-- Data Schema details: `.opencode/skills/tsukuyomi-translator/references/JSON_SCHEMA.md`
-- Prompt specifications: `.opencode/skills/tsukuyomi-translator/references/PROMPTS_GUIDE.md`
+- 提示詞與翻譯風格鐵律：`.opencode/skills/tsukuyomi-translator/references/PROMPTS_GUIDE.md`
+- 詳細檔案規格說明：`.opencode/skills/tsukuyomi-translator/references/FILE_SPEC.md`
