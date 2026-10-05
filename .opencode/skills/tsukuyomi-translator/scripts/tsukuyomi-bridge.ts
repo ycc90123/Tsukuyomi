@@ -208,6 +208,7 @@ export async function unpackNovel(jsonPath: string, targetDir?: string) {
 
       for (const p of paragraphs) {
         const rawJp = p.text || '';
+        if (!rawJp.trim()) continue; // 過濾多餘空白行，確保與 Markdown 表格 1:1 行號對齊
         rawLines.push(rawJp);
         totalParagraphs++;
 
@@ -229,13 +230,15 @@ export async function unpackNovel(jsonPath: string, targetDir?: string) {
       // 儲存 raw/<baseFilename>.txt
       fs.writeFileSync(path.join(rawDir, `${baseFilename}.txt`), rawLines.join('\n'), 'utf-8');
 
-      // 儲存 translated/<baseFilename>.md
-      const headerTitle = chapTransTitle ? `${chapOrigTitle} / ${chapTransTitle}` : chapOrigTitle;
-      let mdText = `# ${headerTitle}\n\n`;
-      mdText += `| 日文原文 | 繁體中文譯文 |\n`;
-      mdText += `| :--- | :--- |\n`;
-      mdText += tableRows.join('\n') + '\n';
-      fs.writeFileSync(path.join(transDir, `${baseFilename}.md`), mdText, 'utf-8');
+      // 僅在章節有翻譯內容時儲存 translated/<baseFilename>.md
+      if (chapHasTranslation) {
+        const headerTitle = chapTransTitle ? `${chapOrigTitle} / ${chapTransTitle}` : chapOrigTitle;
+        let mdText = `# ${headerTitle}\n\n`;
+        mdText += `| 日文原文 | 繁體中文譯文 |\n`;
+        mdText += `| :--- | :--- |\n`;
+        mdText += tableRows.join('\n') + '\n';
+        fs.writeFileSync(path.join(transDir, `${baseFilename}.md`), mdText, 'utf-8');
+      }
     }
 
     metaVolumes.push(metaVol);
